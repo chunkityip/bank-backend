@@ -23,20 +23,20 @@ public class BankAccount {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String accountNumber;
+    private String accountNumber;  // Considered using UUID or custom format
 
     @Enumerated(EnumType.STRING)
-    private BankType bankType;
+    private BankType bankType;  // Enum for bank type
 
     @Column(nullable = false)
-    private Long sortCode;
+    private Long sortCode;  // Set by the bank type
 
-    private String name;
+    private String name;  // Account name
     private BigDecimal openingBalance;
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)
-    private AccountStatus status;
+    private AccountStatus status;  // Enum for account status
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
@@ -44,6 +44,10 @@ public class BankAccount {
 
     @OneToMany(mappedBy = "bankAccount", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TransactionRecord> transactionRecords;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date createdAt;
 
     @PrePersist
     protected void onCreate() {
@@ -53,13 +57,9 @@ public class BankAccount {
         }
     }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    private Date createdAt;
-
+    // Set the bank type and automatically update the sort code
     public void setBankType(BankType bankType) {
         this.bankType = bankType;
         this.sortCode = bankType.getSortCode();
     }
 }
-

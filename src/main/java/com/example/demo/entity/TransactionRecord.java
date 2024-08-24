@@ -34,12 +34,12 @@ public class TransactionRecord {
     private Long toAccountSortCode;
     private BigDecimal amount;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date transactionDate;
+
     @PrePersist
     protected void onCreate() {
         transactionDate = new Date();
     }
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    private Date transactionDate;
 }
