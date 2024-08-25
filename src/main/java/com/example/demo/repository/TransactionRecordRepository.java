@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface TransactionRecordRepository extends JpaRepository<TransactionRecord, Long> {
     List<TransactionRecord> findByBankAccountId(Long accountId);
-    Page<TransactionRecord> findByBankAccountIdOrderByOperationDateDesc(Long accountId, Pageable pageable);
+    Page<TransactionRecord> findByBankAccountIdOrderByTransactionDateDesc(Long accountId, Pageable pageable); // Updated field name
 }

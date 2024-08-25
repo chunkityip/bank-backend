@@ -1,23 +1,13 @@
 plugins {
-	java
-	id("org.springframework.boot") version "3.3.3"
-	id("io.spring.dependency-management") version "1.1.6"
+	id("org.springframework.boot") version "3.2.2"
+	id("io.spring.dependency-management") version "1.0.15.RELEASE"
+	kotlin("jvm") version "1.8.0"
+	kotlin("plugin.spring") version "1.8.0"
 }
 
-group = "com.example"
+group = "com.alibou"
 version = "0.0.1-SNAPSHOT"
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
-}
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
@@ -26,11 +16,12 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
+	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+	implementation("org.springdoc:springdoc-openapi-ui:1.6.14")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {

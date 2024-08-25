@@ -2,11 +2,10 @@ spring:
   profiles:
     active: dev
 
+# Optional: if you want to change the default Swagger UI path
 springdoc:
-  default-produces-media-type: application/json
   swagger-ui:
     path: /swagger-ui.html
 
 server:
-  servlet:
-    context-path: /api/v1
+  port: 9091
