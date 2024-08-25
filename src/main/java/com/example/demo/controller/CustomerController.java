@@ -34,6 +34,7 @@ public class CustomerController {
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
+    // Need to be fixed
     @PostMapping
     public ResponseEntity<CustomerDTO> createCustomer(@RequestBody RegisterCustomerDTO registerCustomerDTO) {
         CustomerDTO createdCustomer = customerService.createCustomer(registerCustomerDTO);
