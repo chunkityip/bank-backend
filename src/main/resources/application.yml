@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: dev
+
+springdoc:
+  default-produces-media-type: application/json
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  servlet:
+    context-path: /api/v1

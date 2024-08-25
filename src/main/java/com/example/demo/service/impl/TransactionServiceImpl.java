@@ -34,8 +34,11 @@ public class TransactionServiceImpl implements TransactionService {
         BankAccount fromAccount = bankAccountRepository.findById(transactionRequestDTO.getFromAccount())
                 .orElseThrow(() -> new BankAccountNotFoundException("From bank account not found"));
 
-        BankAccount toAccount = bankAccountRepository.findById(transactionRequestDTO.getToAccount())
-                .orElseThrow(() -> new BankAccountNotFoundException("To bank account not found"));
+        BankAccount toAccount = null;
+        if (transactionRequestDTO.getToAccount() != null) {
+            toAccount = bankAccountRepository.findById(transactionRequestDTO.getToAccount())
+                    .orElseThrow(() -> new BankAccountNotFoundException("To bank account not found"));
+        }
 
         BigDecimal amount = transactionRequestDTO.getAmount();
 
@@ -44,37 +47,48 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new BalanceNotSufficientException("Insufficient balance");
             }
             fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+            bankAccountRepository.save(fromAccount);
         }
 
         if (transactionRequestDTO.getType() == OperationType.TRANSFER || transactionRequestDTO.getType() == OperationType.DEPOSIT) {
             toAccount.setBalance(toAccount.getBalance().add(amount));
+            bankAccountRepository.save(toAccount);
         }
 
         TransactionRecord transactionRecord = new TransactionRecord();
         transactionRecord.setType(transactionRequestDTO.getType());
-        transactionRecord.setFromAccount(transactionRequestDTO.getFromAccount());
-        transactionRecord.setToAccount(transactionRequestDTO.getToAccount());
-        transactionRecord.setAmount(amount);
+        transactionRecord.setBankAccount(fromAccount);  // Set the associated account
         transactionRecord.setDescription(transactionRequestDTO.getDescription());
+        transactionRecord.setFromAccount(transactionRequestDTO.getFromAccount());
+        transactionRecord.setFromAccountSortCode(transactionRequestDTO.getFromAccountSortCode());
+        transactionRecord.setToAccount(transactionRequestDTO.getToAccount());
+        transactionRecord.setToAccountSortCode(transactionRequestDTO.getToAccountSortCode());
+        transactionRecord.setAmount(amount);
 
         transactionRecord = transactionRecordRepository.save(transactionRecord);
 
-        return new TransactionRecordDTO(transactionRecord.getId(), transactionRecord.getTransactionDate(),
-                transactionRecord.getAmount(), transactionRecord.getType(), transactionRecord.getDescription(),
-                transactionRecord.getFromAccount(), transactionRecord.getFromAccountSortCode(),
-                transactionRecord.getToAccount(), transactionRecord.getToAccountSortCode());
+        return convertToDTO(transactionRecord);
     }
 
     @Override
     public List<TransactionRecordDTO> getTransactionsForAccount(Long accountId) {
         return transactionRecordRepository.findByBankAccountId(accountId)
                 .stream()
-                .map(transactionRecord -> new TransactionRecordDTO(transactionRecord.getId(), transactionRecord.getTransactionDate(),
-                        transactionRecord.getAmount(),
-
-                        transactionRecord.getType(), transactionRecord.getDescription(),
-                        transactionRecord.getFromAccount(), transactionRecord.getFromAccountSortCode(),
-                        transactionRecord.getToAccount(), transactionRecord.getToAccountSortCode()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    private TransactionRecordDTO convertToDTO(TransactionRecord transactionRecord) {
+        return new TransactionRecordDTO(
+                transactionRecord.getId(),
+                transactionRecord.getTransactionDate(),
+                transactionRecord.getAmount(),
+                transactionRecord.getType(),
+                transactionRecord.getDescription(),
+                transactionRecord.getFromAccount(),
+                transactionRecord.getFromAccountSortCode(),
+                transactionRecord.getToAccount(),
+                transactionRecord.getToAccountSortCode()
+        );
     }
 }

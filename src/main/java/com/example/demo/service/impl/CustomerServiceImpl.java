@@ -4,6 +4,7 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.CustomerDTO;
 import com.example.demo.dto.RegisterCustomerDTO;
 import com.example.demo.entity.Customer;
+import com.example.demo.entity.BankAccount;
 import com.example.demo.exceptions.CustomerNotFoundException;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.CustomerService;
