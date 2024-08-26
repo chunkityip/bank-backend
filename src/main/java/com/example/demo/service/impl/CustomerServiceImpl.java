@@ -26,8 +26,14 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO getCustomerById(Long id) throws CustomerNotFoundException {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-        return new CustomerDTO(customer.getId(), customer.getName(), customer.getEmail(),
-                customer.getBankAccounts().stream().map(BankAccount::getAccountNumber).collect(Collectors.toList()));
+
+        // Map the list of account numbers
+        List<String> accountNumbers = customer.getBankAccounts().stream()
+                .map(BankAccount::getAccountNumber)
+                .collect(Collectors.toList());
+
+        // Return the DTO with the account numbers
+        return new CustomerDTO(customer.getId(), customer.getName(), customer.getEmail(), accountNumbers);
     }
 
     @Override
