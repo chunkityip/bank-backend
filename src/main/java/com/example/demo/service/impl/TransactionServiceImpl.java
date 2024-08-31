@@ -1,94 +1,164 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.dto.TransactionRecordDTO;
 import com.example.demo.dto.TransactionRequestDTO;
+import com.example.demo.dto.TransactionResponseDTO;
 import com.example.demo.entity.BankAccount;
 import com.example.demo.entity.TransactionRecord;
 import com.example.demo.enums.OperationType;
-import com.example.demo.exceptions.BalanceNotSufficientException;
-import com.example.demo.exceptions.BankAccountNotFoundException;
-import com.example.demo.repository.BankAccountRepository;
-import com.example.demo.repository.TransactionRecordRepository;
+import com.example.demo.exception.BankAccountNotFoundException;
+import com.example.demo.repo.BankAccountRepository;
+import com.example.demo.repo.CustomerRepository;
+import com.example.demo.repo.TransactionRepository;
 import com.example.demo.service.TransactionService;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.demo.enums.OperationType.*;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
-    private TransactionRecordRepository transactionRecordRepository;
+    private TransactionRepository transactionRepository;
 
     @Autowired
     private BankAccountRepository bankAccountRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+
     @Override
-    @Transactional
-    public TransactionRecordDTO createTransaction(TransactionRequestDTO transactionRequestDTO)
-            throws BankAccountNotFoundException, BalanceNotSufficientException {
-        BankAccount fromAccount = bankAccountRepository.findById(transactionRequestDTO.getFromAccount())
-                .orElseThrow(() -> new BankAccountNotFoundException("From bank account not found"));
+    public TransactionResponseDTO depositTransaction (Long toAccount,
+                                                      String toAccountSortCode,
+                                                      BigDecimal amount) throws BankAccountNotFoundException {
+        //find the bank account
 
-        BankAccount toAccount = null;
-        if (transactionRequestDTO.getToAccount() != null) {
-            toAccount = bankAccountRepository.findById(transactionRequestDTO.getToAccount())
-                    .orElseThrow(() -> new BankAccountNotFoundException("To bank account not found"));
-        }
+//        BankAccount bankAccount = bankAccountRepository.findById(toAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
 
-        BigDecimal amount = transactionRequestDTO.getAmount();
+        BankAccount bankAccount = bankAccountRepository.findByAccountNumber(toAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
+//        System.out.println(bankAccount.getAccountNumber());
 
-        if (transactionRequestDTO.getType() == OperationType.TRANSFER || transactionRequestDTO.getType() == OperationType.WITHDRAWAL) {
-            if (fromAccount.getBalance().compareTo(amount) < 0) {
-                throw new BalanceNotSufficientException("Insufficient balance");
-            }
-            fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
-            bankAccountRepository.save(fromAccount);
-        }
+        //update it's balance
+        BigDecimal tempAmt = bankAccount.getBalance().add(amount);
+        bankAccount.setBalance(tempAmt);
 
-        if (transactionRequestDTO.getType() == OperationType.TRANSFER || transactionRequestDTO.getType() == OperationType.DEPOSIT) {
-            toAccount.setBalance(toAccount.getBalance().add(amount));
-            bankAccountRepository.save(toAccount);
-        }
+        //update the bank account's amount in the database
+        bankAccountRepository.save(bankAccount);
+        // create the new transaction
+        TransactionRecord transaction = new TransactionRecord();
+        transaction.setToAccount(toAccount);
+        transaction.setToAccountSortCode(toAccountSortCode);
+        transaction.setAmount(amount);
+        transaction.setType(DEPOSIT);
+        transaction.setBankAccount(bankAccount);
 
-        TransactionRecord transactionRecord = new TransactionRecord();
-        transactionRecord.setType(transactionRequestDTO.getType());
-        transactionRecord.setBankAccount(fromAccount);  // Set the associated account
-        transactionRecord.setDescription(transactionRequestDTO.getDescription());
-        transactionRecord.setFromAccount(transactionRequestDTO.getFromAccount());
-        transactionRecord.setFromAccountSortCode(transactionRequestDTO.getFromAccountSortCode());
-        transactionRecord.setToAccount(transactionRequestDTO.getToAccount());
-        transactionRecord.setToAccountSortCode(transactionRequestDTO.getToAccountSortCode());
-        transactionRecord.setAmount(amount);
+        //add the transaction to the transaction table
+        transactionRepository.save(transaction);
 
-        transactionRecord = transactionRecordRepository.save(transactionRecord);
+        //return the transaction DTO back to the controller
+        TransactionResponseDTO transactionResponse = converToDTO(transaction);
+        return transactionResponse;
 
-        return convertToDTO(transactionRecord);
+    };
+
+    @Override
+    public TransactionResponseDTO withdrawTransaction( Long fromAccount,
+                                                       String fromAccountSortCode, BigDecimal amount) throws BankAccountNotFoundException {
+        //find the bank account
+        BankAccount bankAccount = bankAccountRepository.findByAccountNumber(fromAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
+        //update it's balance
+        BigDecimal tempAmt = bankAccount.getBalance().subtract(amount);
+        bankAccount.setBalance(tempAmt);
+
+        //update the bank account's amount in the database
+        bankAccountRepository.save(bankAccount);
+        // create the new transaction
+        TransactionRecord transaction = new TransactionRecord();
+        transaction.setFromAccount(fromAccount);
+        transaction.setFromAccountSortCode(fromAccountSortCode);
+        transaction.setAmount(amount);
+        transaction.setType(WITHDRAWAL);
+        transaction.setBankAccount(bankAccount);
+
+        //add the transaction to the transaction table
+        transactionRepository.save(transaction);
+
+        //return the transaction DTO back to the controller
+        TransactionResponseDTO transactionResponse = converToDTO(transaction);
+        return transactionResponse;
     }
 
     @Override
-    public List<TransactionRecordDTO> getTransactionsForAccount(Long accountId) {
-        return transactionRecordRepository.findByBankAccountId(accountId)
-                .stream()
-                .map(this::convertToDTO)
+    public TransactionResponseDTO transferTransaction(Long fromAccount,
+                                                      String fromAccountSortCode,
+                                                      Long toAccount,
+                                                      String toAccountSortCode,
+                                                      BigDecimal amount) throws BankAccountNotFoundException {
+        //find bank accounts
+        //sender bank account
+        BankAccount fromBankAccount = bankAccountRepository.findByAccountNumber(fromAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
+
+        //recipient bank account
+        BankAccount toBankAccount = bankAccountRepository.findByAccountNumber(toAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
+
+
+        //update balances
+        //recipient
+        BigDecimal tempAmt = toBankAccount.getBalance().add(amount);
+        toBankAccount.setBalance(tempAmt);
+
+        //sender
+        tempAmt = fromBankAccount.getBalance().subtract(amount);
+        fromBankAccount.setBalance(tempAmt);
+
+
+        //update the bank account's amount in the database
+        bankAccountRepository.save(toBankAccount);
+        bankAccountRepository.save(fromBankAccount);
+
+        // create the new transaction
+        TransactionRecord transaction = new TransactionRecord();
+        transaction.setToAccount(toAccount);
+        transaction.setToAccountSortCode(toAccountSortCode);
+        transaction.setFromAccount(fromAccount);
+        transaction.setFromAccountSortCode(fromAccountSortCode);
+        transaction.setAmount(amount);
+        transaction.setType(TRANSFER);
+        transaction.setBankAccount(fromBankAccount);
+
+        //add the transaction to the transaction table
+        transactionRepository.save(transaction);
+
+        //return the transaction DTO back to the controller
+        TransactionResponseDTO transactionResponse = converToDTO(transaction);
+        return transactionResponse;
+    }
+
+
+    @Override
+    public List<TransactionResponseDTO> getTransactionsForAccount(Long accountId) {
+        return transactionRepository.findByBankAccountId(accountId).stream()
+                .map(this::converToDTO)
                 .collect(Collectors.toList());
     }
 
-    private TransactionRecordDTO convertToDTO(TransactionRecord transactionRecord) {
-        return new TransactionRecordDTO(
-                transactionRecord.getId(),
+
+
+    private TransactionResponseDTO converToDTO(TransactionRecord transactionRecord) {
+        return new TransactionResponseDTO(
                 transactionRecord.getTransactionDate(),
-                transactionRecord.getAmount(),
                 transactionRecord.getType(),
-                transactionRecord.getDescription(),
                 transactionRecord.getFromAccount(),
                 transactionRecord.getFromAccountSortCode(),
                 transactionRecord.getToAccount(),
-                transactionRecord.getToAccountSortCode()
+                transactionRecord.getToAccountSortCode(),
+                transactionRecord.getAmount()
         );
     }
 }

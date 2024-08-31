@@ -1,16 +1,14 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.BankAccountDTO;
-import com.example.demo.dto.CreateAccountRequestDTO;
-import com.example.demo.exceptions.BankAccountNotFoundException;
-import com.example.demo.exceptions.CustomerNotFoundException;
+import com.example.demo.exception.BankAccountNotFoundException;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface BankAccountService {
-    BankAccountDTO createAccount(CreateAccountRequestDTO createAccountRequestDTO) throws CustomerNotFoundException;
-    BankAccountDTO getAccountById(Long accountId) throws BankAccountNotFoundException;
-    List<BankAccountDTO> getAccountsByCustomerId(Long customerId) throws CustomerNotFoundException;
-    void deleteAccount(Long accountId) throws BankAccountNotFoundException;
+    BankAccountDTO getBankAccountById(Long id) throws BankAccountNotFoundException;
+    BankAccountDTO getBankAccountNumber(Long id) throws BankAccountNotFoundException;
+    List<BankAccountDTO> getBankAccountsByCustomerId(Long customerId);
+    BankAccountDTO createBankAccount(BankAccountDTO bankAccountDTO);
+    Double deleteBankAccount(Long accountNumber) throws BankAccountNotFoundException;
 }

@@ -2,14 +2,18 @@ package com.example.demo.entity;
 
 import com.example.demo.enums.OperationType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
+/**
+ * FG : Create Transaction entity
+ */
+
+@Getter
+@Setter
 @Entity
 @Data
 @AllArgsConstructor
@@ -24,16 +28,25 @@ public class TransactionRecord {
     private OperationType type;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(name = "account_id",nullable = false)
     private BankAccount bankAccount;
 
     private String description;
+    //this is the from account
     private Long fromAccount;
-    private Long fromAccountSortCode;
+    private String fromAccountSortCode;
+//    private Long senderAccount;
+//    private String senderAccountSortCode;
+
+    //this is the to account
     private Long toAccount;
-    private Long toAccountSortCode;
+    private String toAccountSortCode;
+//    private Long recipientAccount;
+//    private String recipientAccountSortCode;
+
     private BigDecimal amount;
 
+    //may have conflict with this type of Date
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private Date transactionDate;

@@ -1,17 +1,23 @@
 package com.example.demo.dto;
 
+import com.example.demo.enums.OperationType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ * FG: Create TransactionDTO to get transaction info from database : bank
+ */
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionRequestDTO {
-    //private OperationType type; // DEPOSIT, WITHDRAWAL, TRANSFER
-    private int type;
+public class TransactionResponseDTO {
+    private Date operationDate;
+    private OperationType type;
     private Long fromAccount;
     private String fromAccountSortCode;
     private Long toAccount;
@@ -21,6 +27,10 @@ public class TransactionRequestDTO {
 //    private Long recipientAccount;
 //    private String recipientAccountSortCode;
     private BigDecimal amount;
-//    private String description;
+    //    private Long transactionId;
+    //    private String description;
+    //    private BankAccount bankAccount;
+
+
 }
 

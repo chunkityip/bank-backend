@@ -9,7 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterCustomerDTO {
     private String name;
-    private String email;
-    private String password;
 }
 

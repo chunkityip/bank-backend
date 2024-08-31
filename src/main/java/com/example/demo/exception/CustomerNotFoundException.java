@@ -1,4 +1,4 @@
-package com.example.demo.exceptions;
+package com.example.demo.exception;
 
 // Exception when a customer is not found
 public class CustomerNotFoundException extends Exception {
