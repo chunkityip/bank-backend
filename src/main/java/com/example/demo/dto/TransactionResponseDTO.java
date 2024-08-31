@@ -22,15 +22,6 @@ public class TransactionResponseDTO {
     private String fromAccountSortCode;
     private Long toAccount;
     private String toAccountSortCode;
-    //    private Long senderAccount;
-//    private String senderAccountSortCode;
-//    private Long recipientAccount;
-//    private String recipientAccountSortCode;
     private BigDecimal amount;
-    //    private Long transactionId;
-    //    private String description;
-    //    private BankAccount bankAccount;
-
-
 }
 
