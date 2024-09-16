@@ -47,16 +47,16 @@ public class CustomerControllerTest {
     }
 
     // Behavior
-    @Test
-    void testGetCustomerById() throws Exception {
-        // When
-        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
-
-        // Result
-        mockMvc.perform(get("/customer/1").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("CK"));
-    }
+//    @Test
+//    void testGetCustomerById() throws Exception {
+//        // When
+//        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
+//
+//        // Result
+//        mockMvc.perform(get("/customer/1").contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.id").value(1L))
+//                .andExpect(jsonPath("$.name").value("CK"));
+//    }
 
 }

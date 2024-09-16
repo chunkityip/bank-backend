@@ -32,18 +32,13 @@ public class TransactionRecord {
     private BankAccount bankAccount;
 
     private String description;
-    //this is the from account
+
     private Long fromAccount;
     private String fromAccountSortCode;
-//    private Long senderAccount;
-//    private String senderAccountSortCode;
 
     //this is the to account
     private Long toAccount;
     private String toAccountSortCode;
-//    private Long recipientAccount;
-//    private String recipientAccountSortCode;
-
     private BigDecimal amount;
 
     //may have conflict with this type of Date
