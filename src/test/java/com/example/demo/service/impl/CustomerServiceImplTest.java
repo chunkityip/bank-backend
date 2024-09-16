@@ -209,13 +209,11 @@ class CustomerServiceImplTest {
     @Test
     public void deleteCustomerTest() throws CustomerNotFoundException {
         // Mock
-
         // Stub
         Customer customer1 = new Customer(1L , "CK" , Collections.emptyList());
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer1));
 
         // Inject
-
         // Act
         customerService.deleteCustomer(1L);
 
