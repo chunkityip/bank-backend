@@ -103,6 +103,7 @@ class CustomerServiceImplTest {
         // Act
         CustomerDTO result = customerService.getCustomerById(customer.getId());
 
+
         // Assert
         assertAll(
                 () -> assertEquals("CK" , result.getName()),
@@ -111,6 +112,8 @@ class CustomerServiceImplTest {
                 () -> assertEquals(account1.getAccountNumber(), result.getAccounts().get(0)),
                 () -> assertEquals(account2.getAccountNumber(), result.getAccounts().get(1))
         );
+
+
 
         // Verity
         verify(customerRepository , times(1)).findById(1L);
@@ -171,6 +174,7 @@ class CustomerServiceImplTest {
         );
     }
 
+
     /** createCustomerTest */
     // Helper method to provide test data (customer names and expected results)
     static Stream<Arguments> provideCustomerNames() {
@@ -202,6 +206,31 @@ class CustomerServiceImplTest {
         verify(customerRepository, times(1)).save(any(Customer.class));
     }
 
+    @Test
+    public void deleteCustomerTest() throws CustomerNotFoundException {
+        // Mock
+
+        // Stub
+        Customer customer1 = new Customer(1L , "CK" , Collections.emptyList());
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer1));
+
+        // Inject
+
+        // Act
+        customerService.deleteCustomer(1L);
+
+        // Vertiy
+        verify(customerRepository , times(1)).delete(customer1);
+
+    }
+
+    @Test
+    public void deleteCustomerException() throws CustomerNotFoundException {
+        Customer customer = new Customer(1L , "CK" , Collections.emptyList());
+        when(customerRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(2L));
+    }
 
 }
 
