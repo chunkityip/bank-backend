@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.demo.dto.CustomerDTO;
 import com.example.demo.dto.RegisterCustomerDTO;
+import com.example.demo.entity.Customer;
+import com.example.demo.service.BankAccountService;
 import com.example.demo.service.CustomerService;
 import com.example.demo.exception.CustomerNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -24,39 +28,60 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
 
-@SpringBootTest
+@WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
-
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private CustomerService customerService;
 
+    @MockBean
+    private BankAccountService bankAccountService;
+
     @InjectMocks
     private CustomerController customerController;
 
-    private CustomerDTO customerDTO;
+    @Test
+    void getCustomerByIdTest() throws Exception {
+        // Stub
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setId(1L);
+        customerDTO.setName("CK");
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
+        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
 
-        // Initialize test data
-        customerDTO = new CustomerDTO(1L, "CK",  Collections.emptyList());
+        mockMvc.perform(get("/customer/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("CK"));
     }
 
-    // Behavior
-//    @Test
-//    void testGetCustomerById() throws Exception {
-//        // When
-//        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
-//
-//        // Result
-//        mockMvc.perform(get("/customer/1").contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id").value(1L))
-//                .andExpect(jsonPath("$.name").value("CK"));
-//    }
+    @Test
+    void getCustomerByIDWith200Status() throws Exception {
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setId(1L);
+        customerDTO.setName("CK");
 
+        when(customerService.getCustomerById(1L)).thenReturn(customerDTO);
+
+        mockMvc.perform(get("/customer/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("CK"));
+    }
+
+    @Test
+    void getCustomerByIdException() throws Exception {
+        when(customerService.getCustomerById(anyLong()))
+                .thenThrow(new CustomerNotFoundException("Customer not found"));
+
+        mockMvc.perform(get("/customer/1"))
+                .andExpect(status().isNotFound());
+    }
 }
