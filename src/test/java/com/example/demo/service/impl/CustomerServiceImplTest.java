@@ -224,9 +224,6 @@ class CustomerServiceImplTest {
 
     @Test
     public void deleteCustomerException() throws CustomerNotFoundException {
-        Customer customer = new Customer(1L , "CK" , Collections.emptyList());
-        when(customerRepository.findById(2L)).thenReturn(Optional.empty());
-
         assertThrows(CustomerNotFoundException.class, () -> customerService.deleteCustomer(2L));
     }
 
