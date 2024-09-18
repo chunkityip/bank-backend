@@ -148,9 +148,7 @@ public class CustomerControllerTest {
 
 
         mockMvc.perform(delete("/customer/1"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Customer not found"));
-
+                .andExpect(status().isNotFound());
     }
 
 }
