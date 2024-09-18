@@ -22,10 +22,4 @@ public interface CustomerService {
     CustomerDTO createCustomer(String customerName);
     void deleteCustomer(Long id) throws CustomerNotFoundException;
 
-    interface BankAccountService {
-        BankAccountDTO getBankAccountById(Long id) throws BankAccountNotFoundException;
-        List<BankAccountDTO> getBankAccountsByCustomerId(Long customerId);
-        BankAccountDTO createBankAccount(BankAccountDTO bankAccountDTO);
-        void deleteBankAccount(Long id) throws BankAccountNotFoundException;
-    }
 }
