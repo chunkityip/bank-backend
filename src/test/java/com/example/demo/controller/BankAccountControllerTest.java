@@ -5,6 +5,7 @@ import com.example.demo.entity.Customer;
 import com.example.demo.exception.BankAccountNotFoundException;
 import com.example.demo.service.BankAccountService;
 import com.example.demo.service.CustomerService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -21,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(BankAccountController.class)
@@ -86,10 +88,39 @@ class BankAccountControllerTest {
     }
 
     @Test
-    void createBankAccount() {
+    void testCreateBankAccount() throws Exception {
+        when(bankAccountService.createBankAccount(any(BankAccountDTO.class)))
+                .thenReturn(bankAccountDTO);
+
+        // JSON output
+        ObjectMapper objectMapper = new ObjectMapper();
+        String bankAccountJSON = objectMapper.writeValueAsString(bankAccountDTO);
+
+        mockMvc.perform(post("/account")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bankAccountJSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.balance").value("100.0"))
+                .andExpect(jsonPath("$.number").value(1234));
     }
 
     @Test
-    void deleteBankAccount() {
+    void testDeleteBankAccount() throws Exception {
+        when(bankAccountService.deleteBankAccount(anyLong())).thenReturn(100.0);
+
+        mockMvc.perform(delete("/account/1234"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("100.0"));
+
+    }
+
+    @Test
+    void testDeleteBankAccountWithException() throws Exception {
+        when(bankAccountService.deleteBankAccount(1111L))
+                .thenThrow(new BankAccountNotFoundException("Account not found"));
+
+        mockMvc.perform(delete("/account/1111"))
+                .andExpect(status().isNotFound());
     }
 }
