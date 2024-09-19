@@ -53,12 +53,17 @@ public class CustomerControllerTest {
     @InjectMocks
     private CustomerController customerController;
 
-    @Test
-    void getCustomerByIdTest() throws Exception {
-        CustomerDTO customerDTO = new CustomerDTO();
+    private CustomerDTO customerDTO;
+
+    @BeforeEach
+    void setUp() {
+        customerDTO = new CustomerDTO();
         customerDTO.setId(1L);
         customerDTO.setName("CK");
+    }
 
+    @Test
+    void getCustomerByIdTest() throws Exception {
         when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
 
         mockMvc.perform(get("/customer/1"))
@@ -80,10 +85,6 @@ public class CustomerControllerTest {
 
     @Test
     void testSearchCustomersByName() throws Exception {
-        CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setId(1L);
-        customerDTO.setName("CK");
-
         when(customerService.searchCustomersByName(anyString()))
                 .thenReturn(Collections.singletonList(customerDTO));
 
@@ -97,10 +98,6 @@ public class CustomerControllerTest {
 
     @Test
     void testCreateCustomer() throws Exception{
-        CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setId(1L);
-        customerDTO.setName("CK");
-
         when(customerService.createCustomer(anyString()))
                 .thenReturn(customerDTO);
 
@@ -117,10 +114,6 @@ public class CustomerControllerTest {
 
     @Test
     void testDeleteCustomer() throws Exception {
-        CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setId(1L);
-        customerDTO.setName("CK");
-
         BankAccountDTO bankAccountDTO1 = new BankAccountDTO();
         bankAccountDTO1.setBalance(new BigDecimal("100.0"));
 
