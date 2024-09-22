@@ -49,15 +49,6 @@ public class CustomerController {
         return new ResponseEntity<>(createdCustomer, HttpStatus.CREATED);
     }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-//        try {
-//            customerService.deleteCustomer(id);
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        } catch (CustomerNotFoundException e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BigDecimal> deleteCustomer(@PathVariable Long id) {

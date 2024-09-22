@@ -63,7 +63,6 @@ public class BankAccountServiceImpl implements BankAccountService {
         //test test test
         System.out.println("Saving bank account: " + bankAccount);
 
-
         bankAccount = bankAccountRepository.save(bankAccount);
 
         return mapToDTO(bankAccount);

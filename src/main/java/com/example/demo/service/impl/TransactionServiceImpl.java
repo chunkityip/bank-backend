@@ -37,14 +37,11 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponseDTO depositTransaction (Long toAccount,
                                                       String toAccountSortCode,
                                                       BigDecimal amount) throws BankAccountNotFoundException {
-        //find the bank account
 
-//        BankAccount bankAccount = bankAccountRepository.findById(toAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
 
-        BankAccount bankAccount = bankAccountRepository.findByAccountNumber(toAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
-//        System.out.println(bankAccount.getAccountNumber());
+        BankAccount bankAccount = bankAccountRepository.findByAccountNumber(toAccount)
+                .orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));
 
-        //update it's balance
         BigDecimal tempAmt = bankAccount.getBalance().add(amount);
         bankAccount.setBalance(tempAmt);
 
@@ -98,8 +95,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponseDTO transferTransaction(Long fromAccount,
                                                       String fromAccountSortCode,
                                                       Long toAccount,
-                                                      String toAccountSortCode,
-                                                      BigDecimal amount) throws BankAccountNotFoundException {
+                                                      String toAccountSortCode,BigDecimal amount) throws BankAccountNotFoundException {
         //find bank accounts
         //sender bank account
         BankAccount fromBankAccount = bankAccountRepository.findByAccountNumber(fromAccount).orElseThrow(() -> new BankAccountNotFoundException("Bank account not found"));

@@ -9,33 +9,39 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
+@WebMvcTest(BankInfoController.class)
 public class BankInfoControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private BankType bankType;
 
     @InjectMocks
     private BankInfoController bankInfoController;
 
-    @Mock
-    private BankType bankType;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    public void testGetSortCode() {
-        // It needs to match to DEFAULT("3435436") from enum BankType
-        // When
+    void testGetSortCode() throws Exception {
         String sortCode = "3435436";
         when(bankType.getSortCode()).thenReturn(sortCode);
 
-        // Then
-        ResponseEntity<String> response = bankInfoController.getSortCode();
+        mockMvc.perform(get("/sortCode"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(sortCode));
 
-        // Result
-        assertEquals(sortCode, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
     }
+
+
+
+
 }
