@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/transaction")
-@CrossOrigin
+//@CrossOrigin(origins = "http://localhost:4200") // change it if you like to use our team ui
+@CrossOrigin // change it if you like to use mallon-bank-ui
 public class TransactionController {
-
     @Autowired
     private TransactionService transactionService;
 
