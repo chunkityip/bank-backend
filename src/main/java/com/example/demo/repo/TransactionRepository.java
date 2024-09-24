@@ -11,10 +11,6 @@ import java.util.List;
  */
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionRecord,Long> {
-//    @Query("select t from Transaction where transactionid like :id")
-//    List<TransactionRecord> searchTransaction(@Param("id") Long transactionId);
-
     // We can do that instead in line 17 and 18
     List<TransactionRecord> findByBankAccountId(Long accountId);
-    //List<TransactionRecord> findByBankAccountIdOrderByTransactionDateDesc(Long accountId, Pageable pageable);
 }
