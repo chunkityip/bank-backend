@@ -10,11 +10,13 @@ import com.example.demo.repo.BankAccountRepository;
 import com.example.demo.repo.CustomerRepository;
 import com.example.demo.service.BankAccountService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Stubber;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,13 +29,16 @@ import static org.mockito.Mockito.*;
 class BankAccountServiceImplTest {
 
     @Mock
-    private CustomerRepository customerRepository;
+    BankAccountRepository bankAccountRepository;
 
     @Mock
-    private BankAccountRepository bankAccountRepository;
+    CustomerRepository customerRepository;
 
     @InjectMocks
-    private BankAccountServiceImpl bankAccountService;
+    BankAccountServiceImpl bankAccountService;
+
+    @InjectMocks
+    CustomerServiceImpl customerService;
 
     private Customer customer;
     private BankAccount bankAccount;
@@ -45,37 +50,70 @@ class BankAccountServiceImplTest {
         bankAccount = new BankAccount(1L ,
                 1234L , null ,
                 null , "Checking" ,
-                null , null , ACTIVATED ,
+                null , new BigDecimal(100.0) , ACTIVATED ,
                 customer , null);
     }
 
     @Test
-    void getBankAccountByIdTest() throws BankAccountNotFoundException {
+    @DisplayName("This test will get the account base on the correct id")
+    void shouldGetBankAccountByIdSuccessfully() throws Exception {
         // Mock
         // Stub
-        when(bankAccountRepository.findById(10L)).thenReturn(Optional.of(bankAccount));
+        when(bankAccountRepository.findById(1L)).thenReturn(Optional.of(bankAccount));
 
         // Inject
         // Act
-        BankAccountDTO result = bankAccountService.getBankAccountById(10L);
+        BankAccountDTO result = bankAccountService.getBankAccountById(1L);
 
         // Assert
         assertAll(
-                () -> assertNotNull(result),
-                () -> assertEquals(10L , result.getCustomerId()),
-                () -> assertEquals("Checking" , result.getName())
+                () -> assertNotNull(result , "Result should not be null"),
+                () -> assertEquals("Checking" , result.getAccountName()),
+                () -> assertEquals(new BigDecimal(100) , result.getBalance())
         );
 
-        verify(bankAccountRepository, times(1)).findById(10L);
+        // Verity
+        verify(bankAccountRepository, times(1)).findById(1L);
+
     }
 
     @Test
-    void getBankAccountByIdTestException() {
+    @DisplayName("This test will throw BankAccountNotFoundException since there is no ID 2L")
+    void shouldThrowBankAccountNotFoundExceptionByIncorrectId() throws BankAccountNotFoundException {
+        when(bankAccountRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        when(bankAccountRepository.findById(2L)).thenReturn(Optional.empty());
+        assertAll(
+                // Non-persistent ID
+                () -> assertThrows(BankAccountNotFoundException.class ,
+                        () -> bankAccountService.getBankAccountById(2L),
+                        "Should throw BankAccountNotFound Exception" +
+                                "since 2L isn't exist"),
 
-        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.getBankAccountById(2L));
+                // Negative ID
+                () -> assertThrows(BankAccountNotFoundException.class ,
+                        () -> bankAccountService.getBankAccountById(-1L) ,
+                        "Should throw BankAccountNotFound Exception" +
+                        "since -1 is negative"),
+
+                // Null Input
+                () -> assertThrows(BankAccountNotFoundException.class ,
+                        () -> bankAccountService.getBankAccountById(null) ,
+                        "Should throw BankAccountNotFound Exception" +
+                        "since the input is null"),
+
+                // Too large and too little
+                () -> assertThrows(BankAccountNotFoundException.class ,
+                        () -> bankAccountService.getBankAccountById(Long.MAX_VALUE) ,
+                        "Should throw BankAccountNotFound Exception" +
+                        "since Long.MAX_VALUE"),
+
+                () -> assertThrows(BankAccountNotFoundException.class ,
+                        () -> bankAccountService.getBankAccountById(Long.MIN_VALUE) ,
+                        "Should throw BankAccountNotFound Exception" +
+                                "since Long.MIN_VALUE")
+        );
     }
+
 
 
     @Test
