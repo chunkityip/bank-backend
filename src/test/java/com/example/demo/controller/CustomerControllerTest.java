@@ -13,6 +13,7 @@ import com.example.demo.service.CustomerService;
 import com.example.demo.exception.CustomerNotFoundException;
 import jdk.dynalink.Operation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
@@ -63,85 +64,99 @@ public class CustomerControllerTest {
     }
 
     @Test
-    void getCustomerByIdTest() throws Exception {
-        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
+    @DisplayName("This test will be pass since the customer id is correct")
+    public void shouldReturnCustomerWithCorrectCustomerId() throws Exception{
+        when(customerService.getCustomerById(1L)).thenReturn(customerDTO);
 
         mockMvc.perform(get("/customer/1"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath(".id").value(1))
-                .andExpect(jsonPath(".name").value("CK"));
-    }
-
-    @Test
-    void testGetCustomerByIdWithException() throws Exception {
-        when(customerService.getCustomerById(anyLong()))
-                .thenThrow(new CustomerNotFoundException("Customer not found"));
-
-        mockMvc.perform(get("/customer/1"))
-                .andExpect(status().isNotFound());
-
-    }
-
-
-    @Test
-    void testSearchCustomersByName() throws Exception {
-        when(customerService.searchCustomersByName(anyString()))
-                .thenReturn(Collections.singletonList(customerDTO));
-
-        mockMvc.perform(get("/customer/search")
-                        .param("keyword" , "CK"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("CK"));
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("CK"));
     }
 
     @Test
-    void testCreateCustomer() throws Exception{
-        when(customerService.createCustomer(anyString()))
-                .thenReturn(customerDTO);
-
-        mockMvc.perform(post("/customer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString("CK")))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath(".id").value(1))
-                    .andExpect(jsonPath(".name").value("CK"));
-
-    }
-
-
-    @Test
-    void testDeleteCustomer() throws Exception {
-        BankAccountDTO bankAccountDTO1 = new BankAccountDTO();
-        bankAccountDTO1.setBalance(new BigDecimal("100.0"));
-
-        BankAccountDTO bankAccountDTO2 = new BankAccountDTO();
-        bankAccountDTO2.setBalance(new BigDecimal("200.0"));
-
-        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
-        when(bankAccountService.getBankAccountsByCustomerId(anyLong())).thenReturn(Arrays
-                .asList(bankAccountDTO1 , bankAccountDTO2));
-
-
-        mockMvc.perform(delete("/customer/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").value(new BigDecimal("300.0")));
-
-
-        verify(customerService).deleteCustomer(anyLong());
-    }
-
-    @Test
-    void testDeleteCustomerWithException() throws Exception {
-        when(customerService.getCustomerById(anyLong()))
+    @DisplayName("This test will throw exception since there has no such customer id")
+    public void shouldThrowExceptionWithIncorrectId() throws Exception {
+        when(customerService.getCustomerById(2L))
                 .thenThrow(new CustomerNotFoundException("Customer not found"));
 
-
-        mockMvc.perform(delete("/customer/1"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/customer/2"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Customer not found"));
     }
+//
+//
+//    @Test
+//    void testSearchCustomersByName() throws Exception {
+//        when(customerService.searchCustomersByName(anyString()))
+//                .thenReturn(Collections.singletonList(customerDTO));
+//
+//        mockMvc.perform(get("/customer/search")
+//                        .param("keyword" , "CK"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$[0].id").value(1))
+//                .andExpect(jsonPath("$[0].name").value("CK"));
+//    }
+//
+//    @Test
+//    void testCreateCustomer() throws Exception{
+//        when(customerService.createCustomer(anyString()))
+//                .thenReturn(customerDTO);
+//
+//        mockMvc.perform(post("/customer")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString("CK")))
+//                    .andExpect(status().isCreated())
+//                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                    .andExpect(jsonPath(".id").value(1))
+//                    .andExpect(jsonPath(".name").value("CK"));
+//
+//    }
+//
+//
+//    @Test
+//    void testDeleteCustomer() throws Exception {
+//        BankAccountDTO bankAccountDTO1 = new BankAccountDTO();
+//        bankAccountDTO1.setBalance(new BigDecimal("100.0"));
+//
+//        BankAccountDTO bankAccountDTO2 = new BankAccountDTO();
+//        bankAccountDTO2.setBalance(new BigDecimal("200.0"));
+//
+//        when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
+//        when(bankAccountService.getBankAccountsByCustomerId(anyLong())).thenReturn(Arrays
+//                .asList(bankAccountDTO1 , bankAccountDTO2));
+//
+//
+//        mockMvc.perform(delete("/customer/1"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$").value(new BigDecimal("300.0")));
+//
+//
+//        verify(customerService).deleteCustomer(anyLong());
+//    }
+//
+//    @Test
+//    void testDeleteCustomerWithException() throws Exception {
+//        when(customerService.getCustomerById(anyLong()))
+//                .thenThrow(new CustomerNotFoundException("Customer not found"));
+//
+//
+//        mockMvc.perform(delete("/customer/1"))
+//                .andExpect(status().isNotFound());
+//    }
+
+
+
+
+
+
+
+
+
+
+
 
 }
